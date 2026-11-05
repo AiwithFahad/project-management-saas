@@ -1,8 +1,9 @@
 <?php $b = $base ?? ''; ?>
 <nav class="sidebar d-flex flex-column p-3">
-  <a class="brand text-white text-decoration-none fs-5 fw-bold mb-4" href="<?= $b ?>dashboard.php"><i class="bi bi-kanban"></i> ProjectPro</a>
+  <a class="brand text-white text-decoration-none fs-5 fw-bold mb-4" href="<?= $b ?>dashboard.php"><span class="brand-mark"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="4" width="5" height="16" rx="1.6" fill="#fff" opacity=".95"/><rect x="10" y="4" width="5" height="11" rx="1.6" fill="#fff" opacity=".65"/><rect x="17" y="4" width="5" height="14" rx="1.6" fill="#fff" opacity=".8"/></svg></span><span class="brand-name">ProjectPro</span></a>
   <?php foreach([['dashboard','dashboard.php','bi-speedometer2','Dashboard'],['projects','projects.php','bi-folder','Projects'],['board','board.php','bi-kanban','Kanban Board'],['tasks','tasks.php','bi-check2-square','Tasks'],['teams','teams.php','bi-people','Teams'],['calendar','calendar.php','bi-calendar3','Calendar'],['milestones','milestones.php','bi-flag','Milestones'],['timelogs','timelogs.php','bi-stopwatch','Time Tracking'],['reports','reports.php','bi-bar-chart','Reports'],['subscription','subscription.php','bi-credit-card','Subscription'],['settings','settings.php','bi-gear','Settings']] as [$k,$f,$i,$l]): ?>
-  <a class="nav-link <?= ($active??'')===$k?'active':'' ?>" href="<?= $b ?><?= $f ?>"><i class="bi <?= $i ?>"></i> <?= $l ?></a><?php endforeach; ?>
-  <div class="mt-auto small text-white-50"><?= e(current_user()['name'] ?? '') ?><br><?= e(current_user()['role'] ?? '') ?></div>
-  <a class="nav-link" href="<?= $b ?>auth/logout.php"><i class="bi bi-box-arrow-right"></i> Logout</a>
+  <a class="nav-link <?= ($active??'')===$k?'active':'' ?>" href="<?= $b ?><?= $f ?>"><i class="bi <?= $i ?>"></i> <span class="nav-label"><?= $l ?></span></a><?php endforeach; ?>
+  <?php $su = current_user() ?? []; $suName = trim((string)($su['name'] ?? 'U')); $suIni = ''; foreach (preg_split('/\s+/', $suName) as $w) { if ($w !== '') $suIni .= strtoupper($w[0]); if (strlen($suIni) >= 2) break; } ?>
+  <div class="mt-auto"><div class="side-user"><span class="avatar sm"><?= e($suIni ?: 'U') ?></span><span class="user-meta"><strong class="small"><?= e($su['name'] ?? '') ?></strong><small><?= e($su['role'] ?? '') ?></small></span></div>
+  <a class="nav-link" href="<?= $b ?>auth/logout.php"><i class="bi bi-box-arrow-right"></i> <span class="nav-label">Logout</span></a></div>
 </nav>

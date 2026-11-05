@@ -1,6 +1,7 @@
 <nav class="sidebar d-flex flex-column p-3">
-<a class="brand text-white text-decoration-none fs-5 fw-bold mb-4" href="index.php"><i class="bi bi-shield-lock"></i> Super Admin</a>
+<a class="brand text-white text-decoration-none fs-5 fw-bold mb-4" href="index.php"><span class="brand-mark"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3l7 3v5c0 4.6-3 8.4-7 10-4-1.6-7-5.4-7-10V6l7-3z" fill="#fff" opacity=".9"/><path d="M9.2 12l2 2 3.6-3.8" stroke="#6d28d9" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="brand-name">Super Admin</span></a>
 <?php foreach([['index.php','Platform','bi-speedometer2'],['tenants.php','Tenants','bi-buildings'],['plans.php','Plans','bi-layers'],['subscriptions.php','Subscriptions','bi-credit-card'],['coupons.php','Coupons','bi-ticket-percent'],['tickets.php','Support Tickets','bi-life-preserver'],['announcements.php','Announcements','bi-megaphone'],['settings.php','Settings','bi-gear']] as [$f,$l,$i]): ?>
-<a class="nav-link <?= ($active??'')===$l?'active':'' ?>" href="<?= $f ?>"><i class="bi <?= $i ?>"></i> <?= $l ?></a><?php endforeach; ?>
-<div class="mt-auto small text-white-50"><?= e(current_user()['name'] ?? '') ?></div>
-<a class="nav-link" href="../auth/logout.php"><i class="bi bi-box-arrow-right"></i> Logout</a></nav>
+<a class="nav-link <?= ($active??'')===$l?'active':'' ?>" href="<?= $f ?>"><i class="bi <?= $i ?>"></i> <span class="nav-label"><?= $l ?></span></a><?php endforeach; ?>
+<?php $su = current_user() ?? []; $suName = trim((string)($su['name'] ?? 'U')); $suIni = ''; foreach (preg_split('/\s+/', $suName) as $w) { if ($w !== '') $suIni .= strtoupper($w[0]); if (strlen($suIni) >= 2) break; } ?>
+<div class="mt-auto"><div class="side-user"><span class="avatar sm"><?= e($suIni ?: 'U') ?></span><span class="user-meta"><strong class="small"><?= e($su['name'] ?? '') ?></strong><small>Super Admin</small></span></div>
+<a class="nav-link" href="../auth/logout.php"><i class="bi bi-box-arrow-right"></i> <span class="nav-label">Logout</span></a></div></nav>
