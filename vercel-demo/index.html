@@ -1,0 +1,106 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ProjectPro — Project Management SaaS Demo</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+:root{--brand:#4f46e5}body{background:#f6f7fb;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+body.dark{background:#0f172a;color:#e5e7eb}body.dark .card,body.dark .tcard{background:#1e293b;color:#e5e7eb;border-color:#334155}body.dark .table{color:#e5e7eb}body.dark .form-control,body.dark .form-select{background:#0f172a;color:#e5e7eb;border-color:#334155}
+.layout{display:flex;min-height:100vh}.sidebar{width:238px;background:linear-gradient(180deg,#312e81,#4f46e5);position:sticky;top:0;height:100vh;padding:1rem}
+.sidebar a{color:#e0e7ff;display:block;padding:.55rem .7rem;border-radius:.5rem;text-decoration:none;margin:.15rem 0;cursor:pointer}.sidebar a:hover,.sidebar a.active{background:rgba(255,255,255,.18);color:#fff}
+.main{flex:1;padding:1.4rem;min-width:0}.card{border:0;border-radius:1rem;box-shadow:0 8px 24px rgba(15,23,42,.07)}
+.page{display:none}.page.show{display:block}.kanban{display:flex;gap:1rem;overflow-x:auto}.kcol{min-width:250px;background:#eef2ff;border-radius:1rem;padding:.75rem}body.dark .kcol{background:#16213a}
+.tcard{background:#fff;border-radius:.75rem;padding:.75rem;margin-bottom:.75rem;cursor:grab;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.price{border:2px solid transparent}.price.current{border-color:var(--brand)}
+@media(max-width:768px){.sidebar{width:70px}.sidebar a span,.brand span{display:none}}
+</style></head><body>
+<div class="layout">
+<nav class="sidebar"><div class="brand text-white fs-5 fw-bold mb-4"><i class="bi bi-kanban"></i> <span>ProjectPro</span></div>
+<a data-page="dashboard" class="active"><i class="bi bi-speedometer2"></i> <span>Dashboard</span></a>
+<a data-page="projects"><i class="bi bi-folder"></i> <span>Projects</span></a>
+<a data-page="board"><i class="bi bi-kanban"></i> <span>Kanban Board</span></a>
+<a data-page="tasks"><i class="bi bi-check2-square"></i> <span>Tasks</span></a>
+<a data-page="team"><i class="bi bi-people"></i> <span>Team</span></a>
+<a data-page="plans"><i class="bi bi-credit-card"></i> <span>Plans & Billing</span></a>
+<div class="mt-4"><button class="btn btn-light btn-sm w-100" id="themeBtn"><i class="bi bi-moon"></i> Dark mode</button></div>
+<div class="text-white-50 small mt-3">Demo workspace<br>Data saves in your browser (localStorage)</div>
+</nav>
+<main class="main">
+<div class="alert alert-info py-2 small">Live demo of <strong>Project Management SaaS</strong> — the full production app is Core PHP 8 + MySQL on GitHub. This demo runs fully in-browser so it can be hosted on Vercel.</div>
+
+<section class="page show" id="page-dashboard"><h4 class="mb-3">Dashboard</h4>
+<div class="row g-3" id="statRow"></div>
+<div class="row g-3 mt-1"><div class="col-lg-7"><div class="card p-3"><h6>Project progress (%)</h6><canvas id="progChart" height="130"></canvas></div></div>
+<div class="col-lg-5"><div class="card p-3"><h6>Upcoming deadlines</h6><ul class="list-unstyled small mb-0" id="deadlineList"></ul></div>
+<div class="card p-3 mt-3"><h6>Tasks by status</h6><canvas id="statusChart" height="120"></canvas></div></div></div></section>
+
+<section class="page" id="page-projects"><h4 class="mb-3">Projects</h4>
+<div class="card p-3 mb-3"><form class="row g-2" id="projectForm"><input type="hidden" id="pId">
+<div class="col-md-3"><input class="form-control" id="pName" placeholder="Project name" required></div>
+<div class="col-md-2"><select class="form-select" id="pStatus"><option>active</option><option>planning</option><option>on_hold</option><option>completed</option></select></div>
+<div class="col-md-2"><select class="form-select" id="pPriority"><option>low</option><option selected>medium</option><option>high</option><option>urgent</option></select></div>
+<div class="col-md-2"><input class="form-control" type="number" id="pProgress" min="0" max="100" placeholder="Progress %"></div>
+<div class="col-md-2"><input class="form-control" type="number" id="pBudget" placeholder="Budget $"></div>
+<div class="col-md-1"><button class="btn btn-primary w-100">Save</button></div></form></div>
+<div class="row g-3" id="projectList"></div></section>
+
+<section class="page" id="page-board"><h4 class="mb-3">Kanban Board <small class="text-muted fs-6">— drag cards between columns</small></h4><div class="kanban" id="kanban"></div></section>
+
+<section class="page" id="page-tasks"><h4 class="mb-3">Tasks</h4>
+<div class="card p-3 mb-3"><form class="row g-2" id="taskForm"><input type="hidden" id="tId">
+<div class="col-md-3"><input class="form-control" id="tTitle" placeholder="Task title" required></div>
+<div class="col-md-2"><select class="form-select" id="tProject"></select></div>
+<div class="col-md-2"><select class="form-select" id="tAssignee"><option>Demo Admin</option><option>Demo Manager</option><option>Ayesha Khan</option></select></div>
+<div class="col-md-1"><select class="form-select" id="tPriority"><option>low</option><option selected>medium</option><option>high</option><option>urgent</option></select></div>
+<div class="col-md-2"><select class="form-select" id="tStatus"><option value="todo">To Do</option><option value="in_progress">In Progress</option><option value="review">Review</option><option value="done">Done</option></select></div>
+<div class="col-md-1"><input class="form-control" type="date" id="tDue"></div>
+<div class="col-md-1"><button class="btn btn-primary w-100">Save</button></div></form></div>
+<div class="card p-0 overflow-auto"><table class="table table-hover mb-0"><thead><tr><th>Task</th><th>Project</th><th>Assignee</th><th>Priority</th><th>Status</th><th>Due</th><th></th></tr></thead><tbody id="taskRows"></tbody></table></div></section>
+
+<section class="page" id="page-team"><h4 class="mb-3">Team</h4><div class="row g-3" id="teamList"></div>
+<div class="card p-3 mt-3"><h6>Teams</h6><p class="small text-muted mb-0">Product Team (lead: Demo Admin) · Design Team (lead: Demo Manager). In the full PHP app, teams, members and email invites are stored per-tenant in MySQL with role-based permissions.</p></div></section>
+
+<section class="page" id="page-plans"><h4 class="mb-3">Plans & Subscription</h4>
+<div class="alert alert-primary">Current plan: <strong>Business</strong> · Status: trial · Coupon <strong>WELCOME10</strong> = 10% off (demo)</div>
+<div class="row g-3" id="planRow"></div>
+<div class="card p-3 mt-3"><h6>Invoices</h6><table class="table mb-0"><tr><th>Invoice</th><th>Amount</th><th>Status</th></tr><tr><td>INV-2026-00001</td><td>$49.00</td><td>paid</td></tr></table></div></section>
+</main></div>
+<script>
+const KEY='projectpro-demo-v1';
+const seed={projects:[{id:1,name:'Website Redesign',status:'active',priority:'high',progress:45,budget:8000},{id:2,name:'Mobile App MVP',status:'active',priority:'urgent',progress:20,budget:25000},{id:3,name:'Internal Docs Portal',status:'completed',priority:'medium',progress:100,budget:3000}],
+tasks:[{id:1,title:'Design homepage mockup',project:'Website Redesign',assignee:'Ayesha Khan',priority:'high',status:'in_progress',due:''},{id:2,title:'Write homepage copy',project:'Website Redesign',assignee:'Demo Manager',priority:'medium',status:'todo',due:''},{id:3,title:'Set up CI pipeline',project:'Website Redesign',assignee:'Demo Admin',priority:'medium',status:'review',due:''},{id:4,title:'Define app data model',project:'Mobile App MVP',assignee:'Demo Admin',priority:'urgent',status:'in_progress',due:''},{id:5,title:'Build Kanban drag-and-drop',project:'Mobile App MVP',assignee:'Ayesha Khan',priority:'high',status:'todo',due:''},{id:6,title:'Fix login redirect bug',project:'Mobile App MVP',assignee:'Demo Manager',priority:'high',status:'todo',due:''},{id:7,title:'Publish docs v1',project:'Internal Docs Portal',assignee:'Demo Manager',priority:'low',status:'done',due:''},{id:8,title:'Weekly status update',project:'Website Redesign',assignee:'Demo Admin',priority:'low',status:'todo',due:''}],
+team:[{name:'Demo Admin',role:'Tenant Admin',tasks:3},{name:'Demo Manager',role:'Manager',tasks:3},{name:'Ayesha Khan',role:'Employee',tasks:2}]};
+let db; try{db=JSON.parse(localStorage.getItem(KEY))||structuredClone(seed)}catch(e){db=structuredClone(seed)}
+const save=()=>localStorage.setItem(KEY,JSON.stringify(db));
+const cols={todo:'To Do',in_progress:'In Progress',review:'Review',done:'Done'};
+let progChart,statusChart;
+function render(){
+ const active=db.projects.filter(p=>p.status==='active').length, doneP=db.projects.filter(p=>p.status==='completed').length;
+ const pending=db.tasks.filter(t=>t.status!=='done').length;
+ document.getElementById('statRow').innerHTML=[['Total projects',db.projects.length,'bi-folder'],['Active projects',active,'bi-play-circle'],['Completed',doneP,'bi-check-circle'],['Pending tasks',pending,'bi-clock'],['Team members',db.team.length,'bi-people'],['Total tasks',db.tasks.length,'bi-check2-square']].map(([l,v,i])=>`<div class="col-md-4 col-xl-2"><div class="card p-3"><i class="bi ${i} fs-4 text-primary"></i><div class="fs-4 fw-bold">${v}</div><div class="text-muted small">${l}</div></div></div>`).join('');
+ document.getElementById('deadlineList').innerHTML=db.tasks.filter(t=>t.status!=='done').slice(0,6).map(t=>`<li class="border-bottom py-2"><strong>${t.title}</strong> · ${t.project} <span class="badge bg-secondary">${cols[t.status]}</span></li>`).join('')||'<li class="text-muted py-2">No pending tasks.</li>';
+ document.getElementById('projectList').innerHTML=db.projects.map(p=>`<div class="col-md-6 col-xl-4"><div class="card p-3 h-100"><div class="d-flex justify-content-between"><strong>${p.name}</strong><span class="badge bg-${p.status==='completed'?'success':'primary'}">${p.status}</span></div><div class="small text-muted">${p.priority} priority · $${Number(p.budget||0).toLocaleString()}</div><div class="progress mt-2"><div class="progress-bar" style="width:${p.progress}%">${p.progress}%</div></div><div class="mt-2"><button class="btn btn-sm btn-outline-primary" onclick="editProject(${p.id})">Edit</button> <button class="btn btn-sm btn-outline-danger" onclick="delProject(${p.id})">Delete</button></div></div></div>`).join('');
+ document.getElementById('kanban').innerHTML=Object.entries(cols).map(([k,l])=>`<div class="kcol" data-status="${k}"><h6>${l} <span class="badge bg-primary">${db.tasks.filter(t=>t.status===k).length}</span></h6><div class="col-body">${db.tasks.filter(t=>t.status===k).map(t=>`<div class="tcard" draggable="true" data-id="${t.id}"><strong>${t.title}</strong><div class="small text-muted">${t.project}</div><div class="small"><span class="badge bg-${t.priority==='urgent'?'danger':t.priority==='high'?'warning':'secondary'}">${t.priority}</span> ${t.assignee}</div></div>`).join('')}</div></div>`).join('');
+ bindDrag();
+ document.getElementById('tProject').innerHTML=db.projects.map(p=>`<option>${p.name}</option>`).join('');
+ document.getElementById('taskRows').innerHTML=db.tasks.map(t=>`<tr><td>${t.title}</td><td>${t.project}</td><td>${t.assignee}</td><td>${t.priority}</td><td>${cols[t.status]}</td><td>${t.due||''}</td><td class="text-end"><button class="btn btn-sm btn-outline-primary" onclick="editTask(${t.id})">Edit</button> <button class="btn btn-sm btn-outline-danger" onclick="delTask(${t.id})">Delete</button></td></tr>`).join('');
+ document.getElementById('teamList').innerHTML=db.team.map(m=>`<div class="col-md-4"><div class="card p-3"><div class="fs-1 text-primary"><i class="bi bi-person-circle"></i></div><strong>${m.name}</strong><div class="text-muted small">${m.role} · ${db.tasks.filter(t=>t.assignee===m.name).length} tasks assigned</div></div></div>`).join('');
+ const plans=[['Free',0,'3 projects · 100 tasks'],['Starter',19,'15 projects · 1,000 tasks'],['Business',49,'50 projects · 10,000 tasks · time tracking'],['Enterprise',99,'Unlimited projects & tasks']];
+ document.getElementById('planRow').innerHTML=plans.map(([n,pr,f])=>`<div class="col-md-3"><div class="card price p-3 h-100 ${n==='Business'?'current':''}"><h5>${n}</h5><div class="fs-4 fw-bold">$${pr}<small class="fs-6 text-muted">/mo</small></div><div class="small text-muted">${f}</div><button class="btn btn-${n==='Business'?'primary':'outline-primary'} btn-sm w-100 mt-2" onclick="alert('Demo only — in the full PHP app this creates a subscription, payment and invoice.')">${n==='Business'?'Current plan':'Choose'}</button></div></div>`).join('');
+ progChart?.destroy(); statusChart?.destroy();
+ progChart=new Chart(document.getElementById('progChart'),{type:'bar',data:{labels:db.projects.map(p=>p.name),datasets:[{label:'Progress %',data:db.projects.map(p=>p.progress),backgroundColor:'rgba(79,70,229,.6)'}]}});
+ statusChart=new Chart(document.getElementById('statusChart'),{type:'doughnut',data:{labels:Object.values(cols),datasets:[{data:Object.keys(cols).map(k=>db.tasks.filter(t=>t.status===k).length),backgroundColor:['#94a3b8','#4f46e5','#f59e0b','#16a34a']}]}});
+}
+function bindDrag(){document.querySelectorAll('.tcard').forEach(c=>c.addEventListener('dragstart',e=>e.dataTransfer.setData('text/plain',c.dataset.id)));
+ document.querySelectorAll('.kcol').forEach(col=>{col.addEventListener('dragover',e=>e.preventDefault());col.addEventListener('drop',e=>{e.preventDefault();const id=+e.dataTransfer.getData('text/plain');const t=db.tasks.find(x=>x.id===id);if(t){t.status=col.dataset.status;save();render();}});});}
+window.editProject=id=>{const p=db.projects.find(x=>x.id===id);pId.value=p.id;pName.value=p.name;pStatus.value=p.status;pPriority.value=p.priority;pProgress.value=p.progress;pBudget.value=p.budget;};
+window.delProject=id=>{if(confirm('Delete project?')){db.projects=db.projects.filter(x=>x.id!==id);save();render();}};
+window.editTask=id=>{const t=db.tasks.find(x=>x.id===id);tId.value=t.id;tTitle.value=t.title;tProject.value=t.project;tAssignee.value=t.assignee;tPriority.value=t.priority;tStatus.value=t.status;tDue.value=t.due||'';};
+window.delTask=id=>{if(confirm('Delete task?')){db.tasks=db.tasks.filter(x=>x.id!==id);save();render();}};
+projectForm.onsubmit=e=>{e.preventDefault();const v={name:pName.value,status:pStatus.value,priority:pPriority.value,progress:+pProgress.value||0,budget:+pBudget.value||0};if(pId.value){Object.assign(db.projects.find(x=>x.id===+pId.value),v);}else{db.projects.push({id:Date.now(),...v});}pId.value='';e.target.reset();save();render();};
+taskForm.onsubmit=e=>{e.preventDefault();const v={title:tTitle.value,project:tProject.value,assignee:tAssignee.value,priority:tPriority.value,status:tStatus.value,due:tDue.value};if(tId.value){Object.assign(db.tasks.find(x=>x.id===+tId.value),v);}else{db.tasks.push({id:Date.now(),...v});}tId.value='';e.target.reset();save();render();};
+document.querySelectorAll('.sidebar a[data-page]').forEach(a=>a.onclick=()=>{document.querySelectorAll('.sidebar a').forEach(x=>x.classList.remove('active'));a.classList.add('active');document.querySelectorAll('.page').forEach(p=>p.classList.remove('show'));document.getElementById('page-'+a.dataset.page).classList.add('show');render();});
+themeBtn.onclick=()=>{document.body.classList.toggle('dark');localStorage.setItem('pm-demo-theme',document.body.classList.contains('dark')?'dark':'light');};
+if(localStorage.getItem('pm-demo-theme')==='dark')document.body.classList.add('dark');
+render();
+</script></body></html>

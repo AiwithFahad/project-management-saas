@@ -1,0 +1,33 @@
+<?php require_once __DIR__ . '/includes/auth.php'; $user=require_role(['tenant_admin','manager','employee']); $pdo=db(); check_tenant_active($pdo); $tid=require_tenant(); $base=''; $active='timelogs'; $pageTitle='Time Tracking';
+if (is_post()) { verify_csrf(); $act=$_POST['action']??'';
+  if($act==='delete') $pdo->prepare('DELETE FROM time_logs WHERE id=? AND tenant_id=?')->execute([(int)$_POST['id'],$tid]);
+  elseif($act==='start') { // close any other open timer for this user first
+    $pdo->prepare('UPDATE time_logs SET ended_at=NOW(),minutes=TIMESTAMPDIFF(MINUTE,started_at,NOW()) WHERE tenant_id=? AND user_id=? AND ended_at IS NULL')->execute([$tid,$user['id']]);
+    $pdo->prepare('INSERT INTO time_logs(tenant_id,project_id,task_id,user_id,started_at,is_billable,notes,created_at) VALUES(?,?,?,?,NOW(),?,?,NOW())')->execute([$tid,(int)($_POST['project_id']??0)?:null,(int)($_POST['task_id']??0)?:null,$user['id'],!empty($_POST['is_billable'])?1:0,$_POST['notes']??null]); flash('success','Timer started.'); }
+  elseif($act==='stop') { $pdo->prepare('UPDATE time_logs SET ended_at=NOW(),minutes=TIMESTAMPDIFF(MINUTE,started_at,NOW()) WHERE id=? AND tenant_id=? AND user_id=? AND ended_at IS NULL')->execute([(int)$_POST['id'],$tid,$user['id']]); flash('success','Timer stopped — minutes calculated.'); }
+  else { $mins=(int)($_POST['minutes']??0); $pdo->prepare('INSERT INTO time_logs(tenant_id,project_id,task_id,user_id,started_at,ended_at,minutes,is_billable,notes,created_at) VALUES(?,?,?,?,DATE_SUB(NOW(),INTERVAL ? MINUTE),NOW(),?,?,?,NOW())')->execute([$tid,(int)($_POST['project_id']??0)?:null,(int)($_POST['task_id']??0)?:null,$user['id'],$mins,$mins,!empty($_POST['is_billable'])?1:0,$_POST['notes']??null]); flash('success','Manual entry added.'); }
+  redirect('timelogs.php'); }
+$s=$pdo->prepare('SELECT l.*,p.name project_name,t.title task_title FROM time_logs l LEFT JOIN projects p ON p.id=l.project_id LEFT JOIN tasks t ON t.id=l.task_id WHERE l.tenant_id=? ORDER BY l.id DESC LIMIT 50'); $s->execute([$tid]); $rows=$s->fetchAll();
+$s=$pdo->prepare('SELECT p.name,COALESCE(SUM(l.minutes),0) mins,COALESCE(SUM(l.is_billable*l.minutes),0) billable_mins FROM projects p LEFT JOIN time_logs l ON l.project_id=p.id AND l.tenant_id=? WHERE p.tenant_id=? GROUP BY p.id ORDER BY mins DESC'); $s->execute([$tid,$tid]); $totals=$s->fetchAll();
+$s=$pdo->prepare('SELECT * FROM time_logs WHERE tenant_id=? AND user_id=? AND ended_at IS NULL ORDER BY id DESC LIMIT 1'); $s->execute([$tid,$user['id']]); $running=$s->fetch();
+$s=$pdo->prepare('SELECT id,name FROM projects WHERE tenant_id=? AND status!="archived" ORDER BY name'); $s->execute([$tid]); $projects=$s->fetchAll();
+$s=$pdo->prepare('SELECT id,title FROM tasks WHERE tenant_id=? AND status!="done" ORDER BY id DESC LIMIT 50'); $s->execute([$tid]); $tasks=$s->fetchAll();
+include __DIR__ . '/includes/header.php'; ?>
+<?php if($running): ?><div class="alert alert-success d-flex justify-content-between align-items-center"><span><strong>Timer running</strong> since <?= e($running['started_at']) ?> — <?= e($running['notes']??'') ?></span><form method="post"><?= csrf_field() ?><input type="hidden" name="action" value="stop"><input type="hidden" name="id" value="<?= $running['id'] ?>"><button class="btn btn-danger btn-sm"><i class="bi bi-stop-circle"></i> Stop timer</button></form></div><?php endif; ?>
+<div class="row g-3"><div class="col-lg-5"><div class="card p-3"><h6>Start timer</h6><form method="post"><?= csrf_field() ?><input type="hidden" name="action" value="start">
+<div class="mb-2"><select class="form-select" name="project_id"><option value="">Project…</option><?php foreach($projects as $p): ?><option value="<?= $p['id'] ?>"><?= e($p['name']) ?></option><?php endforeach; ?></select></div>
+<div class="mb-2"><select class="form-select" name="task_id"><option value="">Task…</option><?php foreach($tasks as $t): ?><option value="<?= $t['id'] ?>"><?= e($t['title']) ?></option><?php endforeach; ?></select></div>
+<div class="mb-2"><input class="form-control" name="notes" placeholder="What are you working on?"></div>
+<div class="form-check mb-2"><input class="form-check-input" type="checkbox" name="is_billable" id="b1" checked><label class="form-check-label" for="b1">Billable</label></div>
+<button class="btn btn-success w-100"><i class="bi bi-play-circle"></i> Start</button></form></div>
+<div class="card p-3 mt-3"><h6>Manual entry</h6><form method="post"><?= csrf_field() ?>
+<div class="mb-2"><select class="form-select" name="project_id"><option value="">Project…</option><?php foreach($projects as $p): ?><option value="<?= $p['id'] ?>"><?= e($p['name']) ?></option><?php endforeach; ?></select></div>
+<div class="mb-2"><input class="form-control" type="number" name="minutes" min="1" placeholder="Minutes worked" required></div>
+<div class="mb-2"><input class="form-control" name="notes" placeholder="Notes"></div>
+<div class="form-check mb-2"><input class="form-check-input" type="checkbox" name="is_billable" id="b2" checked><label class="form-check-label" for="b2">Billable</label></div>
+<button class="btn btn-primary w-100">Add entry</button></form></div>
+<div class="card p-3 mt-3"><h6>Time by project</h6><table class="table mb-0"><tr><th>Project</th><th>Total</th><th>Billable</th></tr><?php foreach($totals as $t): ?><tr><td><?= e($t['name']) ?></td><td><?= round($t['mins']/60,2) ?> h</td><td><?= round($t['billable_mins']/60,2) ?> h</td></tr><?php endforeach; ?></table></div></div>
+<div class="col-lg-7"><div class="card p-0 overflow-auto"><table class="table mb-0"><tr><th>Project / Task</th><th>Started</th><th>Ended</th><th>Minutes</th><th>Billable</th><th></th></tr>
+<?php foreach($rows as $r): ?><tr><td><?= e($r['project_name']??'—') ?><div class="small text-muted"><?= e($r['task_title']??$r['notes']??'') ?></div></td><td class="small"><?= e($r['started_at']) ?></td><td class="small"><?= e($r['ended_at']??'Running…') ?></td><td><?= $r['minutes']!==null?(int)$r['minutes']:'—' ?></td><td><?= $r['is_billable']?'Yes':'No' ?></td>
+<td><?php if(!$r['ended_at']): ?><form method="post"><?= csrf_field() ?><input type="hidden" name="action" value="stop"><input type="hidden" name="id" value="<?= $r['id'] ?>"><button class="btn btn-sm btn-danger">Stop</button></form><?php else: ?><form method="post"><?= csrf_field() ?><input type="hidden" name="action" value="delete"><input type="hidden" name="id" value="<?= $r['id'] ?>"><button class="btn btn-sm btn-outline-danger" data-confirm="Delete log?">Delete</button></form><?php endif; ?></td></tr><?php endforeach; ?></table></div></div></div>
+<?php include __DIR__ . '/includes/footer.php'; ?>
