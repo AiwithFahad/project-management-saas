@@ -5,11 +5,15 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
 :root{--brand:#7c3aed;--brand2:#a855f7;--grad:linear-gradient(135deg,#6d28d9,#7c3aed 45%,#a855f7)}
-body{background:radial-gradient(1000px 440px at 85% -10%,rgba(168,85,247,.16),transparent 60%),radial-gradient(800px 380px at -10% 0%,rgba(124,58,237,.10),transparent 55%),#f4f2fb;font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:#1e293b;letter-spacing:-.01em}
+body{background:radial-gradient(1000px 440px at 85% -10%,rgba(168,85,247,.10),transparent 60%),radial-gradient(800px 380px at -10% 0%,rgba(124,58,237,.06),transparent 55%),#f7f7fc;font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:#3f3d56;letter-spacing:-.01em}
+h1,h2,h3,h4,h5,h6{color:#1e1b2e}.hero h3{color:#fff}
+.card{background:#fff;color:#3f3d56}.form-control,.form-select{background:#fff;color:#232038;border-color:#ddd6f3}
+.table{color:#3f3d56;--bs-table-color:#3f3d56}.table thead th{color:#232038}
 body.dark{background:#0b0714;color:#ede9fe}body.dark .card,body.dark .tcard{background:#17102a;color:#ede9fe;border-color:#2e2450}body.dark .table{color:#ede9fe;--bs-table-color:#ede9fe}body.dark .form-control,body.dark .form-select{background:#17102a;color:#ede9fe;border-color:#3b2d68}
 body.dark .kcol{background:#1a1233}body.dark .alert-info{background:#2e1a5e;color:#ddd6fe;border:0}
-.layout{display:flex;min-height:100vh}.sidebar{width:242px;background:linear-gradient(180deg,#2e1065,#4c1d95 55%,#6d28d9);position:sticky;top:0;height:100vh;padding:1.1rem .95rem;box-shadow:12px 0 34px rgba(46,16,101,.25)}
-.sidebar a{color:#ddd6fe;display:flex;align-items:center;gap:.6rem;padding:.58rem .7rem;border-radius:.7rem;text-decoration:none;margin:.16rem 0;cursor:pointer;font-weight:500;transition:.18s}.sidebar a:hover{background:rgba(255,255,255,.1);color:#fff}.sidebar a.active{background:rgba(255,255,255,.17);color:#fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,.14)}
+.layout{display:flex;min-height:100vh}.sidebar{width:242px;background:#fff;border-right:1px solid #e6e1f5;position:sticky;top:0;height:100vh;padding:1.1rem .95rem;box-shadow:6px 0 24px rgba(76,29,149,.05)}
+.sidebar .brand{color:#1e1b2e}.sidebar .brand i{color:var(--brand)}
+.sidebar a{color:#3f3d56;display:flex;align-items:center;gap:.6rem;padding:.58rem .7rem;border-radius:.7rem;text-decoration:none;margin:.16rem 0;cursor:pointer;font-weight:500;transition:.18s}.sidebar a i{color:#7c3aed}.sidebar a:hover{background:#f1eefc;color:#4c1d95}.sidebar a.active{background:var(--grad);color:#fff;box-shadow:0 8px 18px rgba(124,58,237,.28)}.sidebar a.active i{color:#fff}
 .main{flex:1;padding:1.5rem;min-width:0}.card{border:1px solid #e6e1f5;border-radius:1rem;box-shadow:0 10px 30px rgba(76,29,149,.09)}
 .btn-primary{background:var(--grad);border:0;box-shadow:0 8px 18px rgba(124,58,237,.3)}.btn-outline-primary{color:var(--brand);border-color:#a78bfa}.text-primary{color:var(--brand)!important}
 .progress{height:.55rem;border-radius:99px;background:#ede9fe}.progress-bar{background:var(--grad);border-radius:99px}
@@ -19,7 +23,7 @@ body.dark .kcol{background:#1a1233}body.dark .alert-info{background:#2e1a5e;colo
 .hero p{color:#ede9fe}.hero .btn{position:relative;z-index:1}
 .stat i{width:42px;height:42px;border-radius:.8rem;display:inline-flex;align-items:center;justify-content:center;background:#ede9fe;color:var(--brand);margin-bottom:.4rem}
 .kanban{display:flex;gap:1rem;overflow-x:auto;padding-bottom:1rem}.kcol{min-width:262px;flex:1 0 262px;background:#efeafd;border:1px solid #e6e1f5;border-radius:1.1rem;padding:.85rem}
-.kcol h6{font-size:.82rem;text-transform:uppercase;letter-spacing:.06em;color:#64748b}
+.kcol h6{font-size:.82rem;text-transform:uppercase;letter-spacing:.06em;color:#4c4666}
 .tcard{background:#fff;border:1px solid #e6e1f5;border-radius:.9rem;padding:.75rem;margin-bottom:.7rem;cursor:grab;box-shadow:0 2px 8px rgba(76,29,149,.07);transition:transform .18s,box-shadow .18s;overflow:hidden}
 .tcard:hover{transform:translateY(-3px);box-shadow:0 12px 26px rgba(76,29,149,.15)}.tcard:active{cursor:grabbing}
 .tcover{height:58px;border-radius:.6rem;margin:-.3rem -.3rem .55rem;background:var(--grad);overflow:hidden}.tcover img{width:100%;height:100%;object-fit:cover;display:block}
@@ -34,15 +38,15 @@ body.dark .chip{background:#2e1a5e;color:#ddd6fe}
 @media(max-width:768px){.sidebar{width:72px}.sidebar a span,.brand span{display:none}.sidebar a{justify-content:center}}
 </style></head><body>
 <div class="layout">
-<nav class="sidebar"><div class="brand text-white fs-5 fw-bold mb-4"><i class="bi bi-kanban"></i> <span>ProjectPro</span></div>
+<nav class="sidebar"><div class="brand fs-5 fw-bold mb-4"><i class="bi bi-kanban"></i> <span>ProjectPro</span></div>
 <a data-page="dashboard" class="active"><i class="bi bi-speedometer2"></i> <span>Dashboard</span></a>
 <a data-page="projects"><i class="bi bi-folder"></i> <span>Projects</span></a>
 <a data-page="board"><i class="bi bi-kanban"></i> <span>Kanban Board</span></a>
 <a data-page="tasks"><i class="bi bi-check2-square"></i> <span>Tasks</span></a>
 <a data-page="team"><i class="bi bi-people"></i> <span>Team</span></a>
 <a data-page="plans"><i class="bi bi-credit-card"></i> <span>Plans & Billing</span></a>
-<div class="mt-4"><button class="btn btn-light btn-sm w-100" id="themeBtn"><i class="bi bi-moon"></i> Dark mode</button></div>
-<div class="text-white-50 small mt-3">Demo workspace<br>Data saves in your browser (localStorage)</div>
+<div class="mt-4"><button class="btn btn-outline-primary btn-sm w-100" id="themeBtn"><i class="bi bi-moon"></i> Dark mode</button></div>
+<div class="text-muted small mt-3">Demo workspace<br>Data saves in your browser (localStorage)</div>
 </nav>
 <main class="main">
 <div class="alert alert-info py-2 small">Live demo of <strong>Project Management SaaS</strong> — the full production app is Core PHP 8 + MySQL on GitHub. This demo runs fully in-browser so it can be hosted on Vercel.</div>
@@ -124,7 +128,10 @@ window.delTask=id=>{if(confirm('Delete task?')){db.tasks=db.tasks.filter(x=>x.id
 projectForm.onsubmit=e=>{e.preventDefault();const v={name:pName.value,status:pStatus.value,priority:pPriority.value,progress:+pProgress.value||0,budget:+pBudget.value||0};if(pId.value){Object.assign(db.projects.find(x=>x.id===+pId.value),v);}else{db.projects.push({id:Date.now(),...v});}pId.value='';e.target.reset();save();render();};
 taskForm.onsubmit=e=>{e.preventDefault();const v={title:tTitle.value,project:tProject.value,assignee:tAssignee.value,priority:tPriority.value,status:tStatus.value,due:tDue.value};if(tId.value){Object.assign(db.tasks.find(x=>x.id===+tId.value),v);}else{db.tasks.push({id:Date.now(),...v});}tId.value='';e.target.reset();save();render();};
 document.querySelectorAll('.sidebar a[data-page]').forEach(a=>a.onclick=()=>{document.querySelectorAll('.sidebar a').forEach(x=>x.classList.remove('active'));a.classList.add('active');document.querySelectorAll('.page').forEach(p=>p.classList.remove('show'));document.getElementById('page-'+a.dataset.page).classList.add('show');render();});
-themeBtn.onclick=()=>{document.body.classList.toggle('dark');localStorage.setItem('pm-demo-theme',document.body.classList.contains('dark')?'dark':'light');};
-if(localStorage.getItem('pm-demo-theme')==='dark')document.body.classList.add('dark');
+const THEME_KEY='projectpro-theme-v2';
+function applyChartTheme(){if(window.Chart){const dk=document.body.classList.contains('dark');Chart.defaults.color=dk?'#ede9fe':'#3f3d56';Chart.defaults.borderColor=dk?'rgba(237,233,254,.12)':'rgba(35,32,56,.08)';}}
+themeBtn.onclick=()=>{document.body.classList.toggle('dark');localStorage.setItem(THEME_KEY,document.body.classList.contains('dark')?'dark':'light');themeBtn.innerHTML=document.body.classList.contains('dark')?'<i class="bi bi-sun"></i> Light mode':'<i class="bi bi-moon"></i> Dark mode';applyChartTheme();render();};
+if(localStorage.getItem(THEME_KEY)==='dark'){document.body.classList.add('dark');themeBtn.innerHTML='<i class="bi bi-sun"></i> Light mode';}
+applyChartTheme();
 render();
 </script></body></html>
